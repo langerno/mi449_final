@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 function Pikachu(){
   const [pokemon, setPokemon] = useState([]);
   useEffect(() => {
-    fetch('https://pokeapi.co/api/v2/pokemon/pikachu/')
+    fetch('https://pokeapi.co/api/v2/pokemon/charmander/')
       .then((response) => response.json())
       .then((data) => {
         console.log(data);
