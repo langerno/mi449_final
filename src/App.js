@@ -16,8 +16,25 @@ function Pikachu(){
       });
   }, []);
 
+  // const [image, setImage] = useState([]);
+  // useEffect(() => {
+  //   fetch()
+  //     .then((response) => response.json())
+  //     .then((data) => {
+  //       console.log(data);
+  //       setImage(data);
+  //     })
+  //     .catch((err) => {
+  //       console.log(err.message);
+  //     });
+  // }, []);
+
   return (
+    <>
     <h1>{pokemon.name}</h1>
+    <img src={pokemon.sprites.front_default} alt='pikachu front'/>
+    <img src={pokemon.sprites.back_default} alt='pikachu back'/>
+    </>
   )
 }
 
