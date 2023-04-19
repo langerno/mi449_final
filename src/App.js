@@ -1,5 +1,25 @@
 import logo from './logo.svg';
 import './App.css';
+import React, { useState, useEffect } from 'react';
+
+function Pokemon(){
+  const [pokemon, setPokemon] = useState([]);
+  useEffect(() => {
+    fetch('https://pokeapi.co/api/v2/pokemon/pikachu/')
+      .then((response) => response.json())
+      .then((data) => {
+        console.log(data);
+        setPokemon(data);
+      })
+      .catch((err) => {
+        console.log(err.message);
+      });
+  }, []);
+
+  return (
+    <h1>{pokemon.name}</h1>
+  )
+}
 
 function App() {
   return (
@@ -17,6 +37,7 @@ function App() {
         >
           Learn React
         </a>
+        <Pokemon/>
       </header>
     </div>
   );
