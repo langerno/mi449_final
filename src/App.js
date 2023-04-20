@@ -2,24 +2,30 @@ import './App.css';
 import React, { useState, useEffect } from 'react';
 
 function Pikachu(){
-  const [pokemon, setPokemon] = useState([]);
-  useEffect(() => {
-    fetch('https://pokeapi.co/api/v2/pokemon/charmander/')
-      .then((response) => response.json())
-      .then((data) => {
-        console.log(data);
-        setPokemon(data);
-      })
-      .catch((err) => {
-        console.log(err.message);
-      });
-  }, []);
+  const [charm, setCharm] = useState([])
+  const [bulb, setBulb] = useState([])
+  const [squirt, setSquirt] = useState([])
+
+  const urls = ['https://pokeapi.co/api/v2/pokemon/charmander/', 
+                'https://pokeapi.co/api/v2/pokemon/bulbasaur/', 
+                'https://pokeapi.co/api/v2/pokemon/squirtle/',];
+
+  const getData = async () => {
+    const [result1, result2, result3] = await Promise.all(
+      urls.map((url) => fetch(url).then((res) => res.json()))
+    );
+    setCharm(result1);
+    setBulb(result2);
+    setSquirt(result3)
+  };
+
+  getData();
 
   return (
     <>
-    <h1>{pokemon.name}</h1>
-    <img src={pokemon.sprites.front_default} alt='pikachu front'/>
-    <img src={pokemon.sprites.back_default} alt='pikachu back'/>
+      <h1>
+        {charm.name} {bulb.name} {squirt.name}
+      </h1>
     </>
   )
 }
