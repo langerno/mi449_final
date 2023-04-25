@@ -10,9 +10,9 @@ function capitalizeFirstLetter(string) {
 
 function Search(){
   return (
-    <div class="mb-3">
-      <input id="searchBar" class="form-control" aria-describedby="emailHelp"/>
-      <button onClick={onSubmit}>Submit</button>
+    <div class="form-inline">
+      <input id="searchBar" class="form-control"/>
+      <button class="btn btn-primary" onClick={onSubmit}>Submit</button>
     </div>
   )
 
@@ -40,22 +40,22 @@ async function onSubmit() {
 function PokeDesc(){
   return(
     <>
-<table id="desc" class="table table-dark table-bordered table-sm">
-      <thead id="desc_head" class="thead-dark">
-        <th scope="col">Name</th>
-        <th scope="col">Type</th>
-        <th scope="col">Height</th>
-        <th scope="col">Weight</th>
-      </thead>
-      <tbody id="desc_body">
-        <tr>
-          <td id="name"></td>
-          <td id="type"></td>
-          <td id="height"></td>
-          <td id="weight"></td>
-        </tr>
-      </tbody>
-    </table>
+      <table id="desc" class="table table-dark table-bordered table-sm">
+        <thead id="desc_head" class="thead-dark">
+          <th scope="col">Name</th>
+          <th scope="col">Type</th>
+          <th scope="col">Height</th>
+          <th scope="col">Weight</th>
+        </thead>
+        <tbody id="desc_body">
+          <tr>
+            <td id="name"></td>
+            <td id="type"></td>
+            <td id="height"></td>
+            <td id="weight"></td>
+          </tr>
+        </tbody>
+      </table>
     </>
   )
 }
@@ -76,8 +76,8 @@ function updateDesc(){
 function PokeImage() {
   return(
     <>
-      <img alt="" id="frontSprite"></img>
-      <img alt="" id="backSprite"></img>
+      <img class="img img-responsive" alt="" id="frontSprite"></img>
+      <img class="img img-responsive" alt="" id="backSprite"></img>
     </>
   )
 }
@@ -119,6 +119,38 @@ async function updateAbilities() {
 
 
 
+
+function PokeMoves(){
+  return(
+    <table id="moves" class="table table-dark table-bordered table-sm">
+      <thead id="moves_head" class="thead-dark">
+        <th scope="col">Name</th>
+        <th scope="col">Description</th>
+      </thead>
+      <tbody id="moves_body">
+
+      </tbody>
+    </table>
+  )
+}
+
+async function updateMoves(){
+  let moves_html = ""
+  console.log(currentPokeData.moves)
+  for(let move of currentPokeData.moves) {
+    let response = await fetch(move.move.url)
+    let move_data = await response.json();
+    let desc = move_data.effect_entries[0]
+    let chance = move_data.effect_chance
+    console.log(desc)
+    if (desc != null) {
+      moves_html += "<tr scope='row'><td>" + capitalizeFirstLetter(move.move.name) + "</td><td>" + desc.short_effect.replace("$effect_chance", chance) + "</td></tr>"
+    }
+  }
+  document.getElementById("moves_body").innerHTML = moves_html
+}
+
+
 function PokeStats(){
   return(
     <table id="stats" class="table table-dark table-bordered table-sm">
@@ -145,7 +177,9 @@ async function updateStats() {
 
 
 async function updatePage() {
+  document.getElementById("searchBar").value = ""
   updateAbilities()
+  updateMoves()
   updateStats()
   updateImage()
   updateDesc()
@@ -158,8 +192,9 @@ function App() {
         <Search />
         <PokeImage />
         <PokeDesc />
-        <PokeAbilities />
         <PokeStats />
+        <PokeAbilities />
+        <PokeMoves />
       </header>
     </div>
   );
