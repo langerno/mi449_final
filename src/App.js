@@ -43,12 +43,14 @@ function PokeDesc(){
 <table id="desc" class="table table-dark table-bordered table-sm">
       <thead id="desc_head" class="thead-dark">
         <th scope="col">Name</th>
+        <th scope="col">Type</th>
         <th scope="col">Height</th>
         <th scope="col">Weight</th>
       </thead>
       <tbody id="desc_body">
         <tr>
           <td id="name"></td>
+          <td id="type"></td>
           <td id="height"></td>
           <td id="weight"></td>
         </tr>
@@ -60,9 +62,16 @@ function PokeDesc(){
 
 function updateDesc(){
   document.getElementById("name").innerHTML = capitalizeFirstLetter(currentPokeData.name)
+  document.getElementById("type").innerHTML = ""
+  for(let type of currentPokeData.types) {
+    document.getElementById("type").innerHTML += capitalizeFirstLetter(type.type.name) + " "
+  }
+
   document.getElementById("height").innerHTML = currentPokeData.height + " dm"
   document.getElementById("weight").innerHTML = currentPokeData.weight + " hg"
 }
+
+
 
 function PokeImage() {
   return(
