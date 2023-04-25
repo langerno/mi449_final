@@ -2,7 +2,9 @@ import './App.css';
 // import React, { useState, useEffect } from 'react';
 
 let currentPokeData = null
-let prevInput = null
+let prevInput = ""
+let pokeMoves = []
+let movesSearch = ""
 
 function capitalizeFirstLetter(string) {
   return string.charAt(0).toUpperCase() + string.slice(1);
@@ -122,33 +124,54 @@ async function updateAbilities() {
 
 function PokeMoves(){
   return(
-    <table id="moves" class="table table-dark table-bordered table-sm">
-      <thead id="moves_head" class="thead-dark">
-        <th scope="col">Name</th>
-        <th scope="col">Description</th>
-      </thead>
-      <tbody id="moves_body">
-
-      </tbody>
-    </table>
+    <>
+      <div class="input-group mb-4">
+        <input type="text" class="form-control" id="moves-search-input" />
+        <button class="btn btn-primary" id="moves-search" type="button">
+          <i class="fa fa-search" onClick={filterMoves}>Search</i>
+        </button>
+      </div>
+      <table id="moves" class="table table-dark table-bordered table-sm">
+        <thead id="moves_head" class="thead-dark">
+          <th scope="col">Name</th>
+          <th scope="col">Description</th>
+        </thead>
+        <tbody id="moves_body">
+        </tbody>
+      </table>
+    </>
   )
 }
 
 async function updateMoves(){
   let moves_html = ""
-  console.log(currentPokeData.moves)
-  for(let move of currentPokeData.moves) {
+  document.getElementById("moves-search-input").value = ""
+  if(movesSearch.length === 0) {
+    pokeMoves = currentPokeData.moves
+  }
+  console.log(pokeMoves)
+  for(let move of pokeMoves) {
     let response = await fetch(move.move.url)
     let move_data = await response.json();
     let desc = move_data.effect_entries[0]
     let chance = move_data.effect_chance
-    console.log(desc)
     if (desc != null) {
       moves_html += "<tr scope='row'><td>" + capitalizeFirstLetter(move.move.name) + "</td><td>" + desc.short_effect.replace("$effect_chance", chance) + "</td></tr>"
     }
   }
   document.getElementById("moves_body").innerHTML = moves_html
 }
+
+async function filterMoves() {
+  movesSearch = document.getElementById("moves-search-input").value
+  console.log(movesSearch)
+  if (movesSearch.length > 0){
+    pokeMoves = pokeMoves.filter(value => (value.move.name).includes(movesSearch))
+  }
+  updateMoves()
+}
+
+
 
 
 function PokeStats(){
