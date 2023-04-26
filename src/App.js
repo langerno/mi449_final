@@ -7,7 +7,6 @@ const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS
 const supabase = createClient(supabaseUrl, supabaseKey)
 
 let currentPokeData = null
-// let prevInput = ""
 let pokeMoves = []
 let movesSearch = ""
 let previouslySearched = []
@@ -52,7 +51,7 @@ async function checkEntry(name) {
 
 
 
-
+/* Search and submit */
 
 function Search(){
   return (
@@ -102,7 +101,7 @@ async function updateSearch() {
 
 
 
-
+/* Vote buttons */
 
 function VoteButtons() {
   return (
@@ -145,7 +144,7 @@ async function addVote(upvote) {
 
 
 
-
+/* Pokemon description */
 
 
 function PokeDesc(){
@@ -186,7 +185,7 @@ function updateDesc(){
 
 
 
-
+/* Pokemon images */
 
 function PokeImage() {
   return(
@@ -210,7 +209,7 @@ async function updateImage(){
 
 
 
-
+/* Pokemon abilties */
 
 function PokeAbilities(){
   return(
@@ -242,7 +241,7 @@ async function updateAbilities() {
 
 
 
-
+/* Pokemon Moves */
 
 
 function PokeMoves(){
@@ -296,9 +295,7 @@ async function filterMoves() {
 
 
 
-
-
-
+/* Pokemon stats */
 
 
 function PokeStats(){
@@ -326,7 +323,7 @@ async function updateStats() {
 }
 
 
-
+/* Previous pokemon */
 
 
 function PreviousPokemon() {
