@@ -7,9 +7,15 @@ const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS
 const supabase = createClient(supabaseUrl, supabaseKey)
 
 let currentPokeData = null
-let prevInput = ""
+// let prevInput = ""
 let pokeMoves = []
 let movesSearch = ""
+let previouslySearched = []
+let found = undefined
+
+function capitalizeFirstLetter(string) {
+  return string.charAt(0).toUpperCase() + string.slice(1);
+}
 
 async function insertEntry(name, fav) {
   const {error} = await supabase
@@ -47,9 +53,6 @@ async function checkEntry(name) {
 
 
 
-function capitalizeFirstLetter(string) {
-  return string.charAt(0).toUpperCase() + string.slice(1);
-}
 
 function Search(){
   return (
@@ -64,19 +67,38 @@ function Search(){
 async function onSubmit() {
   let userInput = document.getElementById("searchBar").value.toLowerCase()
   
-  // Adding this to avoiding spamming API calls
-  if (userInput !== prevInput && userInput !=="") {
-    prevInput = userInput
-    let response = await fetch("https://pokeapi.co/api/v2/pokemon/" + userInput +"/")
-    currentPokeData = await response.json();
+  if (userInput !== "") {
+    // Adding this to avoiding spamming API calls and to allow easy movement back to previous visits
+    if(found === undefined && currentPokeData !== null) {
+      previouslySearched.push(currentPokeData)
+    }
+    found = previouslySearched.find(pokemon => pokemon.name === userInput)
+    if (found === undefined) {
+      try{
+        let response = await fetch("https://pokeapi.co/api/v2/pokemon/" + userInput +"/")
+        currentPokeData = await response.json()
+      } catch {
+        found = currentPokeData
+        console.log("FAILED TO FIND POKEMON")
+      }
 
+    }else{
+      currentPokeData = found
+    }
     console.log(currentPokeData)
 
     if (currentPokeData !== null) {
       updatePage();
     }
+    console.log(previouslySearched)
   }
 }
+
+async function updateSearch() {
+  document.getElementById("searchBar").value = ""
+}
+
+
 
 
 
@@ -119,6 +141,8 @@ async function addVote(upvote) {
   }
   updateVoteButtons()
 }
+
+
 
 
 
@@ -305,22 +329,55 @@ async function updateStats() {
 
 
 
+function PreviousPokemon() {
+  return(
+      <div id="prev-poke">
+      </div>
+  )
+}
+
+async function updatePrevPokemon() {
+  let newHtml = ""
+  for(let pokemon of previouslySearched) {
+    newHtml += " <button class='btn prevPokeSelector'><img id=" + pokemon.name + " src='" + pokemon.sprites.front_default + " '/> </button>"
+  }
+  document.getElementById("prev-poke").innerHTML = newHtml
+  let selectors = document.getElementsByClassName("btn prevPokeSelector")
+  for(let but of selectors) {
+    but.onclick = fetchPrevPoke
+  }
+}
+
+function fetchPrevPoke(event) {
+  let element = event.srcElement
+  if (previouslySearched.some(pokemon => !(pokemon.name === currentPokeData.name))){
+    previouslySearched.push(currentPokeData)
+  }
+  currentPokeData = previouslySearched.find(pokemon => pokemon.name === element.id)
+  found = currentPokeData
+  console.log("fetched old pokemon: " + currentPokeData.name)
+  updatePage()
+}
+
+
 
 
 async function updatePage() {
-  document.getElementById("searchBar").value = ""
+  updateSearch()
   updateAbilities()
   updateMoves()
   updateStats()
   updateImage()
   updateDesc()
   updateVoteButtons()
+  updatePrevPokemon()
 }
 
 function App() {
   return (
     <div className="App">
       <header className="App-header">
+        <PreviousPokemon />
         <Search />
         <PokeImage />
         <VoteButtons />
