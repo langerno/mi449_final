@@ -1,10 +1,51 @@
 import './App.css';
 // import React, { useState, useEffect } from 'react';
+import { createClient } from '@supabase/supabase-js'
+
+const supabaseUrl = 'https://ajuqdoycpyvofiqvmtwn.supabase.co'
+const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFqdXFkb3ljcHl2b2ZpcXZtdHduIiwicm9sZSI6ImFub24iLCJpYXQiOjE2ODI1MjU0NTMsImV4cCI6MTk5ODEwMTQ1M30.Lw6T6Hr_Ui0DQa8mkzrObfyXkY-VT5Bs0LcQH1Mljgc"
+const supabase = createClient(supabaseUrl, supabaseKey)
 
 let currentPokeData = null
 let prevInput = ""
 let pokeMoves = []
 let movesSearch = ""
+
+async function insertEntry(name, fav) {
+  const {error} = await supabase
+                        .from('pokemon_fav')
+                        .insert({Pokename: name, Favorites: fav})
+  if(error !== null){
+    console.log("Error entering pokemon to database:")
+    console.log(error)
+  }
+}
+
+async function checkEntry(name) {
+  const {data, error} = await supabase
+                        .from('pokemon_fav')
+                        .select("*")
+                        .eq("Pokename", name)
+
+  console.log("Fetched from supabase: ")
+  console.log(data)
+
+  const row = data[0]
+  let ret = 0
+  if(row==null && error===null) {
+    insertEntry(name, 0)
+    ret = 0
+  } else if(error===null) {
+    ret = row.Favorites
+  } else{
+    ret = error
+  }
+
+  return ret
+}
+
+
+
 
 function capitalizeFirstLetter(string) {
   return string.charAt(0).toUpperCase() + string.slice(1);
@@ -24,7 +65,7 @@ async function onSubmit() {
   let userInput = document.getElementById("searchBar").value.toLowerCase()
   
   // Adding this to avoiding spamming API calls
-  if (userInput !== prevInput) {
+  if (userInput !== prevInput && userInput !=="") {
     prevInput = userInput
     let response = await fetch("https://pokeapi.co/api/v2/pokemon/" + userInput +"/")
     currentPokeData = await response.json();
@@ -40,17 +81,47 @@ async function onSubmit() {
 
 
 
-function FavoriteButton() {
+
+function VoteButtons() {
   return (
     <form>
-      <button onClick={addFavorite} class="btn btn-secondary" type="button">Favorite</button>
+      <p id="vote"></p>
+      <button onClick={like} class="btn btn-secondary" type="button">Like</button>
+      <button onClick={dislike} class="btn btn-secondary" type="button">Dislike</button>
     </form>
   )
 }
 
-async function addFavorite() {
-  console.log("addFavorite")
+function like() {
+  addVote(true);
 }
+
+function dislike() {
+  addVote(false);
+}
+
+async function updateVoteButtons(){
+  let response = await checkEntry(currentPokeData.name)
+  document.getElementById("vote").innerHTML = response
+}
+
+async function addVote(upvote) {
+  let name = currentPokeData.name
+  console.log(name)
+  let result = await checkEntry(name)
+  result += upvote ? 1 : -1
+  const {error} = await supabase.from("pokemon_fav")
+                                .update({Favorites : result})
+                                .eq("Pokename", name)
+  if(error != null) {
+    console.log("Error updating favorites")
+    console.log(error)
+  }
+  updateVoteButtons()
+}
+
+
+
 
 
 function PokeDesc(){
@@ -89,6 +160,10 @@ function updateDesc(){
 
 
 
+
+
+
+
 function PokeImage() {
   return(
     <>
@@ -105,6 +180,10 @@ async function updateImage(){
   document.getElementById("backSprite").setAttribute("src", currentPokeData.sprites.back_default);
   document.getElementById("backSprite").setAttribute("alt", "Back Sprite of " + currentPokeData.name);
 }
+
+
+
+
 
 
 
@@ -133,6 +212,11 @@ async function updateAbilities() {
   }
   document.getElementById("abilities_body").innerHTML = ability_html
 }
+
+
+
+
+
 
 
 
@@ -189,6 +273,10 @@ async function filterMoves() {
 
 
 
+
+
+
+
 function PokeStats(){
   return(
     <table id="stats" class="table table-dark table-bordered table-sm">
@@ -214,6 +302,11 @@ async function updateStats() {
 }
 
 
+
+
+
+
+
 async function updatePage() {
   document.getElementById("searchBar").value = ""
   updateAbilities()
@@ -221,6 +314,7 @@ async function updatePage() {
   updateStats()
   updateImage()
   updateDesc()
+  updateVoteButtons()
 }
 
 function App() {
@@ -229,7 +323,7 @@ function App() {
       <header className="App-header">
         <Search />
         <PokeImage />
-        <FavoriteButton />
+        <VoteButtons />
         <PokeDesc />
         <PokeStats />
         <PokeAbilities />
