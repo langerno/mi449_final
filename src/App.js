@@ -1,5 +1,4 @@
 import './App.css';
-// import React, { useState, useEffect } from 'react';
 import { createClient } from '@supabase/supabase-js'
 
 const supabaseUrl = 'https://ajuqdoycpyvofiqvmtwn.supabase.co'
