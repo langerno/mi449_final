@@ -39,6 +39,20 @@ async function onSubmit() {
 
 
 
+
+function FavoriteButton() {
+  return (
+    <form>
+      <button onClick={addFavorite} class="btn btn-secondary" type="button">Favorite</button>
+    </form>
+  )
+}
+
+async function addFavorite() {
+  console.log("addFavorite")
+}
+
+
 function PokeDesc(){
   return(
     <>
@@ -91,6 +105,7 @@ async function updateImage(){
   document.getElementById("backSprite").setAttribute("src", currentPokeData.sprites.back_default);
   document.getElementById("backSprite").setAttribute("alt", "Back Sprite of " + currentPokeData.name);
 }
+
 
 
 
@@ -214,6 +229,7 @@ function App() {
       <header className="App-header">
         <Search />
         <PokeImage />
+        <FavoriteButton />
         <PokeDesc />
         <PokeStats />
         <PokeAbilities />
