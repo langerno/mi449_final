@@ -371,6 +371,7 @@ async function getFavs() {
   let tempData = []
   if(userid !== "") {
     let {data, error} = await supabase.from('user_favs').select('fav_pokemon').eq('username', userid)
+    console.log(data)
     if(error) {
       console.log("Error finding user in database: ")
       console.log(error)
