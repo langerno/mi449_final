@@ -371,29 +371,29 @@ async function getFavs() {
   let tempData = []
   if(userid !== "") {
     let {data, error} = await supabase.from('user_favs').select('fav_pokemon').eq('username', userid)
-    console.log(data)
     if(error) {
       console.log("Error finding user in database: ")
       console.log(error)
     }
 
-    if(data.length > 1) {
+    if(data.length < 1) {
       console.log("User not found, making new row")
       let {error} = await supabase.from('user_favs').insert({username : userid, fav_pokemon : []})
       if(error) {
         console.log("Error inserting new user into database")
         console.log(error)
       }
+    }else{
+      for(let fav of data[0].fav_pokemon) {
+        try{
+          console.log(data)
+          let d = await getPokemonFromApi(fav.id)
+          tempData.push(d)
+        } catch {
+          console.log("FAILED TO GET POKEMON FROM API: " + fav)
+          console.log(fav)
+        }
     }
-    for(let fav of data[0].fav_pokemon) {
-      try{
-        console.log(data)
-        let d = await getPokemonFromApi(fav.id)
-        tempData.push(d)
-      } catch {
-        console.log("FAILED TO GET POKEMON FROM API: " + fav)
-        console.log(fav)
-      }
     }
 
     favData = tempData
