@@ -1,15 +1,31 @@
+"use client";
+
 import './App.css';
-import { createClient } from '@supabase/supabase-js'
+
+import { createClient} from '@supabase/supabase-js'
+import { useState, useEffect } from 'react'
+import { Auth } from '@supabase/auth-ui-react'
+import { ThemeSupa } from '@supabase/auth-ui-shared'
 
 const supabaseUrl = 'https://ajuqdoycpyvofiqvmtwn.supabase.co'
 const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFqdXFkb3ljcHl2b2ZpcXZtdHduIiwicm9sZSI6ImFub24iLCJpYXQiOjE2ODI1MjU0NTMsImV4cCI6MTk5ODEwMTQ1M30.Lw6T6Hr_Ui0DQa8mkzrObfyXkY-VT5Bs0LcQH1Mljgc"
 const supabase = createClient(supabaseUrl, supabaseKey)
+
 
 let currentPokeData = null
 let pokeMoves = []
 let movesSearch = ""
 let previouslySearched = []
 let found = undefined
+let userid = ""
+let favData = []
+
+async function getPokemonFromApi(poke) {
+  let response = await fetch("https://pokeapi.co/api/v2/pokemon/" + poke +"/")
+  let pokeman = await response.json()
+  console.log("FOUND POKEMON IN API")
+  return pokeman
+}
 
 function capitalizeFirstLetter(string) {
   return string.charAt(0).toUpperCase() + string.slice(1);
@@ -64,31 +80,33 @@ function Search(){
 
 async function onSubmit() {
   let userInput = document.getElementById("searchBar").value.toLowerCase()
-  
-  if (userInput !== "") {
-    // Adding this to avoiding spamming API calls and to allow easy movement back to previous visits
-    if(found === undefined && currentPokeData !== null) {
-      previouslySearched.push(currentPokeData)
-    }
-    found = previouslySearched.find(pokemon => pokemon.name === userInput)
+  findPokemon(userInput)
+}
+
+async function findPokemon(poke_name) {
+  if (poke_name !== "") {
+    found = (previouslySearched.concat(favData)).find(pokemon => pokemon.name === poke_name)
+
     if (found === undefined) {
       try{
-        let response = await fetch("https://pokeapi.co/api/v2/pokemon/" + userInput +"/")
-        currentPokeData = await response.json()
+        currentPokeData = await getPokemonFromApi(poke_name)
       } catch {
         found = currentPokeData
-        console.log("FAILED TO FIND POKEMON")
+        console.log("FAILED TO FIND POKEMON IN API")
       }
 
     }else{
+      console.log("FOUND POKEMON LOCALLY")
       currentPokeData = found
     }
-    console.log(currentPokeData)
 
     if (currentPokeData !== null) {
       updatePage();
     }
     console.log(previouslySearched)
+    if(found === undefined && currentPokeData !== null) {
+      previouslySearched.push(currentPokeData)
+    }
   }
 }
 
@@ -340,20 +358,111 @@ async function updatePrevPokemon() {
   document.getElementById("prev-poke").innerHTML = newHtml
   let selectors = document.getElementsByClassName("btn prevPokeSelector")
   for(let but of selectors) {
-    but.onclick = fetchPrevPoke
+    but.onclick = fetchLocalPoke
   }
 }
 
-function fetchPrevPoke(event) {
+function fetchLocalPoke(event) {
   let element = event.srcElement
-  if (previouslySearched.some(pokemon => !(pokemon.name === currentPokeData.name))){
-    previouslySearched.push(currentPokeData)
-  }
-  currentPokeData = previouslySearched.find(pokemon => pokemon.name === element.id)
-  found = currentPokeData
-  console.log("fetched old pokemon: " + currentPokeData.name)
-  updatePage()
+  findPokemon(element.id)
 }
+
+
+
+
+/* Login */
+
+function AuthApp() {
+  const [session, setSession] = useState(null)
+  console.log('AUTH APP COMPONENT')
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session)
+    })
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session)
+    })
+    
+    return () => subscription.unsubscribe()
+  }, [])
+
+  if(session != null) {
+    console.log(session.user.id)
+  }
+
+  if (!session) {
+    return (<Auth supabaseClient={supabase} providers={[]} appearance={{ theme: ThemeSupa }} />)
+  }
+  else {
+    userid = session.user.id
+    updateFavorites()
+    return (<div>Logged In</div>)
+  }
+}
+
+
+
+
+/* Favorites */
+
+function Favorites() {
+  return (
+    <>
+      <div id="favorites">testing TESTING</div>
+    </>
+  )
+}
+
+async function getFavs() {
+  let tempData = []
+  if(userid !== "") {
+    let {data, error} = await supabase.from('user_favs').select('fav_pokemon').eq('username', userid)
+    if(error) {
+      console.log("Error finding user in database: ")
+      console.log(error)
+    }
+
+    if(data.length > 1) {
+      console.log("User not found, making new row")
+      let {error} = await supabase.from('user_favs').insert({username : userid, fav_pokemon : []})
+      if(error) {
+        console.log("Error inserting new user into database")
+        console.log(error)
+      }
+    }
+    for(let fav of data[0].fav_pokemon) {
+      try{
+        let d = await getPokemonFromApi(fav)
+        tempData.push(d)
+      } catch {
+        console.log("FAILED TO GET POKEMON FROM API: " + fav)
+      }
+    }
+
+    favData = tempData
+  }
+}
+
+
+async function updateFavorites() {
+  await getFavs()
+  let newHtml = ""
+  console.log(favData)
+  for(let fav of favData) {
+    newHtml += " <button class='btn favPokeSelector'><img id=" + fav.name + " src='" + fav.sprites.front_default + " '/> </button>"
+  }
+  document.getElementById("favorites").innerHTML = newHtml
+
+  let selectors = document.getElementsByClassName("btn favPokeSelector")
+  for(let but of selectors) {
+    but.onclick = fetchLocalPoke
+  }
+  console.log(document.getElementById("favorites"))
+}
+
 
 
 
@@ -370,17 +479,21 @@ async function updatePage() {
 }
 
 function App() {
+
   return (
     <div className="App">
       <header className="App-header">
+        <AuthApp />
         <PreviousPokemon />
         <Search />
+        <Favorites />
         <PokeImage />
         <VoteButtons />
         <PokeDesc />
         <PokeStats />
         <PokeAbilities />
         <PokeMoves />
+
       </header>
     </div>
   );
