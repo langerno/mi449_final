@@ -31,39 +31,6 @@ function capitalizeFirstLetter(string) {
   return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
-async function insertEntry(name, fav) {
-  const {error} = await supabase
-                        .from('pokemon_fav')
-                        .insert({Pokename: name, Favorites: fav})
-  if(error !== null){
-    console.log("Error entering pokemon to database:")
-    console.log(error)
-  }
-}
-
-async function checkEntry(name) {
-  const {data, error} = await supabase
-                        .from('pokemon_fav')
-                        .select("*")
-                        .eq("Pokename", name)
-
-  console.log("Fetched from supabase: ")
-  console.log(data)
-
-  const row = data[0]
-  let ret = 0
-  if(row==null && error===null) {
-    insertEntry(name, 0)
-    ret = 0
-  } else if(error===null) {
-    ret = row.Favorites
-  } else{
-    ret = error
-  }
-
-  return ret
-}
-
 
 
 /* Search and submit */
@@ -105,6 +72,9 @@ async function findPokemon(poke_name) {
     }
     console.log(previouslySearched)
     if(found === undefined && currentPokeData !== null) {
+      if(previouslySearched.length > 4){
+        previouslySearched.shift();
+      }
       previouslySearched.push(currentPokeData)
     }
   }
@@ -118,49 +88,27 @@ async function updateSearch() {
 
 
 
-/* Vote buttons */
+/* Favorite button */
 
-function VoteButtons() {
+function FavoriteButton() {
   return (
-    <>
-      <button type="button" class="btn btn-secondary" onClick={addToFavorite}>Favorite</button>
-    </>
-    // <form>
-    //   <p id="vote"></p>
-    //   <button onClick={like} class="btn btn-secondary" type="button">Like</button>
-    //   <button onClick={dislike} class="btn btn-secondary" type="button">Dislike</button>
-    // </form>
+    <div id="favoriteButton">
+    </div>
   )
 }
 
-function like() {
-  addVote(true);
-}
-
-function dislike() {
-  addVote(false);
-}
-
-async function updateVoteButtons(){
-  // let response = await checkEntry(currentPokeData.name)
-  // document.getElementById("vote").innerHTML = response
-}
-
-async function addVote(upvote) {
-  let name = currentPokeData.name
-  console.log(name)
-  let result = await checkEntry(name)
-  result += upvote ? 1 : -1
-  const {error} = await supabase.from("pokemon_fav")
-                                .update({Favorites : result})
-                                .eq("Pokename", name)
-  if(error != null) {
-    console.log("Error updating favorites")
-    console.log(error)
+async function updateFavoriteButton(){
+  let newHtml = ""
+  let element = document.getElementById("favoriteButton")
+  if (!favData.includes(currentPokeData)) {
+    newHtml = "<button type='button' class='btn btn-secondary'>Favorite</button>"
+    element.onclick = addToFavorite
+  }else {
+    newHtml = "<button type='button' class='btn btn-secondary'>Unfavorite</button>"
+    element.onclick = unfavorite
   }
-  updateVoteButtons()
+  document.getElementById("favoriteButton").innerHTML = newHtml
 }
-
 
 
 
@@ -414,7 +362,7 @@ function AuthApp() {
 function Favorites() {
   return (
     <>
-      <div id="favorites">testing TESTING</div>
+      <div id="favorites"></div>
     </>
   )
 }
@@ -469,12 +417,26 @@ async function updateFavorites() {
 async function addToFavorite() {
   if (!favData.includes(currentPokeData)){
     favData.push(currentPokeData)
-    await supabase.from('user_favs').update({fav_pokemon : favData}).eq('username', userid)
+    await updateDbFavs()
   }
   updateFavorites()
-  console.log(favData)
+  updateFavoriteButton()
 }
 
+async function unfavorite() {
+  for (var i = favData.length - 1; i >= 0; i--) {
+    if (favData[i] === currentPokeData) {
+        favData.splice(i, 1);
+        await updateDbFavs()
+    }
+  }
+  updateFavorites()
+  updateFavoriteButton()
+}
+
+async function updateDbFavs() {
+  await supabase.from('user_favs').update({fav_pokemon : favData}).eq('username', userid)
+}
 
 
 
@@ -486,7 +448,7 @@ async function updatePage() {
   updateStats()
   updateImage()
   updateDesc()
-  updateVoteButtons()
+  updateFavoriteButton()
   updatePrevPokemon()
 }
 
@@ -500,7 +462,7 @@ function App() {
         <Search />
         <Favorites />
         <PokeImage />
-        <VoteButtons />
+        <FavoriteButton />
         <PokeDesc />
         <PokeStats />
         <PokeAbilities />
