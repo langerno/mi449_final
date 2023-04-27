@@ -122,11 +122,14 @@ async function updateSearch() {
 
 function VoteButtons() {
   return (
-    <form>
-      <p id="vote"></p>
-      <button onClick={like} class="btn btn-secondary" type="button">Like</button>
-      <button onClick={dislike} class="btn btn-secondary" type="button">Dislike</button>
-    </form>
+    <>
+      <button type="button" class="btn btn-secondary" onClick={addToFavorite}>Favorite</button>
+    </>
+    // <form>
+    //   <p id="vote"></p>
+    //   <button onClick={like} class="btn btn-secondary" type="button">Like</button>
+    //   <button onClick={dislike} class="btn btn-secondary" type="button">Dislike</button>
+    // </form>
   )
 }
 
@@ -139,8 +142,8 @@ function dislike() {
 }
 
 async function updateVoteButtons(){
-  let response = await checkEntry(currentPokeData.name)
-  document.getElementById("vote").innerHTML = response
+  // let response = await checkEntry(currentPokeData.name)
+  // document.getElementById("vote").innerHTML = response
 }
 
 async function addVote(upvote) {
@@ -435,10 +438,12 @@ async function getFavs() {
     }
     for(let fav of data[0].fav_pokemon) {
       try{
-        let d = await getPokemonFromApi(fav)
+        console.log(data)
+        let d = await getPokemonFromApi(fav.id)
         tempData.push(d)
       } catch {
         console.log("FAILED TO GET POKEMON FROM API: " + fav)
+        console.log(fav)
       }
     }
 
@@ -446,11 +451,9 @@ async function getFavs() {
   }
 }
 
-
 async function updateFavorites() {
   await getFavs()
   let newHtml = ""
-  console.log(favData)
   for(let fav of favData) {
     newHtml += " <button class='btn favPokeSelector'><img id=" + fav.name + " src='" + fav.sprites.front_default + " '/> </button>"
   }
@@ -461,6 +464,15 @@ async function updateFavorites() {
     but.onclick = fetchLocalPoke
   }
   console.log(document.getElementById("favorites"))
+}
+
+async function addToFavorite() {
+  if (!favData.includes(currentPokeData)){
+    favData.push(currentPokeData)
+    await supabase.from('user_favs').update({fav_pokemon : favData}).eq('username', userid)
+  }
+  updateFavorites()
+  console.log(favData)
 }
 
 
