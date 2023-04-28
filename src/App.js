@@ -362,7 +362,7 @@ function AuthApp() {
 function Favorites() {
   return (
     <>
-      <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#favorites" aria-expanded="false" aria-controls="collapseExample">
+      <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#favorites" aria-expanded="false" aria-controls="favorites">
         Favorites
       </button>
       <div id="favorites" class="collapse">
