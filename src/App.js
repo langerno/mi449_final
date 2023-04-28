@@ -19,6 +19,7 @@ let previouslySearched = []
 let found = undefined
 let userid = ""
 let favData = []
+let login = false
 
 async function getPokemonFromApi(poke) {
   let response = await fetch("https://pokeapi.co/api/v2/pokemon/" + poke +"/")
@@ -37,7 +38,7 @@ function capitalizeFirstLetter(string) {
 
 function Search(){
   return (
-    <div class="form-inline">
+    <div class="w-25 form-inline">
       <input id="searchBar" class="form-control"/>
       <button class="btn btn-primary" onClick={onSubmit}>Submit</button>
     </div>
@@ -46,7 +47,7 @@ function Search(){
 }
 
 async function onSubmit() {
-  let userInput = document.getElementById("searchBar").value.toLowerCase()
+  let userInput = document.getElementById("searchBar").value.toLowerCase().trim()
   findPokemon(userInput)
 }
 
@@ -101,10 +102,10 @@ async function updateFavoriteButton(){
   let newHtml = ""
   let element = document.getElementById("favoriteButton")
   if (!favData.includes(currentPokeData)) {
-    newHtml = "<button type='button' class='btn btn-secondary'>Favorite</button>"
+    newHtml = "<button type='button' class='btn btn-light'>Favorite</button>"
     element.onclick = addToFavorite
   }else {
-    newHtml = "<button type='button' class='btn btn-secondary'>Unfavorite</button>"
+    newHtml = "<button type='button' class='btn btn-warning'>Favorite</button>"
     element.onclick = unfavorite
   }
   document.getElementById("favoriteButton").innerHTML = newHtml
@@ -120,6 +121,7 @@ function PokeDesc(){
     <>
       <table id="desc" class="table table-dark table-bordered table-sm">
         <thead id="desc_head" class="thead-dark">
+          <th scope="col"></th>
           <th scope="col">Name</th>
           <th scope="col">Type</th>
           <th scope="col">Height</th>
@@ -127,7 +129,8 @@ function PokeDesc(){
         </thead>
         <tbody id="desc_body">
           <tr>
-            <td id="name"></td>
+            <td><FavoriteButton></FavoriteButton></td>
+            <td id='name'></td>
             <td id="type"></td>
             <td id="height"></td>
             <td id="weight"></td>
@@ -157,10 +160,42 @@ function updateDesc(){
 
 function PokeImage() {
   return(
-    <>
-      <img class="img img-responsive" alt="" id="frontSprite"></img>
-      <img class="img img-responsive" alt="" id="backSprite"></img>
-    </>
+    <div class="ml-5">
+      <div className="bg-dark text-white card" style={{width: 450}}>
+        <div className="card-img container">
+            <div className="card-img row">
+              <div className="col-sm">
+                <img class="w-100 img-fluid" alt="" id="frontSprite"></img>
+              </div>
+              <div className="col-sm">
+                <img class="w-100 img-fluid" alt="" id="backSprite"></img>
+              </div>
+            </div>
+          </div>
+          <div class="card-img-overlay">
+            <h5 class="card-title">
+              Default Sprites
+            </h5>
+          </div>
+      </div>
+      <div className="bg-dark text-white card" style={{width: 450}}>
+        <div className="card-img container">
+            <div className="card-img row">
+              <div className="col-sm">
+                <img class="w-100 img-fluid" alt="" id="shinyFront"></img>
+              </div>
+              <div className="col-sm">
+                <img class="w-100 img-fluid" alt="" id="shinyBack"></img>
+              </div>
+            </div>
+          </div>
+          <div class="card-img-overlay">
+            <h5 class="card-title">
+              Shiny Sprites
+            </h5>
+          </div>
+      </div>
+    </div>
   )
 }
 
@@ -170,6 +205,12 @@ async function updateImage(){
 
   document.getElementById("backSprite").setAttribute("src", currentPokeData.sprites.back_default);
   document.getElementById("backSprite").setAttribute("alt", "Back Sprite of " + currentPokeData.name);
+
+  document.getElementById("shinyFront").setAttribute("src", currentPokeData.sprites.front_shiny);
+  document.getElementById("shinyFront").setAttribute("alt", "Front Sprite of Shiny " + currentPokeData.name);
+
+  document.getElementById("shinyBack").setAttribute("src", currentPokeData.sprites.back_shiny);
+  document.getElementById("shinyBack").setAttribute("alt", "Back Sprite of Shiny" + currentPokeData.name);
 }
 
 
@@ -181,15 +222,18 @@ async function updateImage(){
 
 function PokeAbilities(){
   return(
-    <table id="abilities" class="table table-dark table-bordered table-sm">
-      <thead id="abilities_head" class="thead-dark">
-        <th scope="col">Name</th>
-        <th scope="col">Description</th>
-      </thead>
-      <tbody id="abilities_body">
+    <div>
+      <h5> Abilties </h5>
+      <table id="abilities" class="table table-dark table-bordered table-sm">
+        <thead id="abilities_head" class="thead-dark">
+          <th scope="col">Name</th>
+          <th scope="col">Description</th>
+        </thead>
+        <tbody id="abilities_body">
 
-      </tbody>
-    </table>
+        </tbody>
+      </table>
+    </div>
   )
 }
 
@@ -214,7 +258,8 @@ async function updateAbilities() {
 
 function PokeMoves(){
   return(
-    <>
+    <div>
+      <h5>Moves</h5>
       <div class="input-group mb-4">
         <input type="text" class="form-control" id="moves-search-input" />
         <button class="btn btn-primary" id="moves-search" type="button">
@@ -229,7 +274,7 @@ function PokeMoves(){
         <tbody id="moves_body">
         </tbody>
       </table>
-    </>
+    </div>
   )
 }
 
@@ -268,16 +313,19 @@ async function filterMoves() {
 
 function PokeStats(){
   return(
-    <table id="stats" class="table table-dark table-bordered table-sm">
-      <thead id="stats_head" class="thead-dark">
-        <th scope="col">Name</th>
-        <th scope="col">Base Count</th>
-        <th scope="col">Effort</th>
-      </thead>
-      <tbody id="stats_body">
+    <div>
+      <h5> Base Stats and Effort </h5>
+      <table id="stats" class="table table-dark table-bordered table-sm">
+        <thead id="stats_head" class="thead-dark">
+          <th scope="col">Name</th>
+          <th scope="col">Base Count</th>
+          <th scope="col">Effort</th>
+        </thead>
+        <tbody id="stats_body">
 
-      </tbody>
-    </table>
+        </tbody>
+      </table>
+    </div>
   )
 }
 
@@ -345,12 +393,14 @@ function AuthApp() {
   }
 
   if (!session) {
+    login = false
     return (<Auth supabaseClient={supabase} providers={[]} appearance={{ theme: ThemeSupa }} />)
   }
   else {
     userid = session.user.id
+    login = true
     updateFavorites()
-    return (<div>Logged In</div>)
+    return (<Favorites />)
   }
 }
 
@@ -361,14 +411,16 @@ function AuthApp() {
 
 function Favorites() {
   return (
-    <>
-      <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#favorites" aria-expanded="false" aria-controls="favorites">
-        Favorites
-      </button>
-      <div id="favorites" class="collapse">
-
-      </div>
-    </>
+    <div className="fixed-top w-25 bg-dark card">
+        <a class="btn text-white btn-primary card-title" data-toggle="collapse" href="#favorites-collapse" role="button" aria-expanded="false" aria-controls="favorites-collapse">
+          Favorites
+        </a>
+        <div id="favorites-collapse" class="collapse card-body">
+          <div id="favorites">
+              
+          </div>
+        </div>
+    </div>
   )
 }
 
@@ -406,18 +458,27 @@ async function getFavs() {
 }
 
 async function updateFavorites() {
-  await getFavs()
-  let newHtml = ""
-  for(let fav of favData) {
-    newHtml += " <button class='btn favPokeSelector'><img id=" + fav.name + " src='" + fav.sprites.front_default + " '/> </button>"
-  }
-  document.getElementById("favorites").innerHTML = newHtml
+  if(login) {
+    await getFavs()
+    let newHtml = ""
+    for(let fav of favData) {
+      newHtml += " <button class='btn favPokeSelector'><img id=" + fav.name + " src='" + fav.sprites.front_default + " '/> </button>"
+    }
 
-  let selectors = document.getElementsByClassName("btn favPokeSelector")
-  for(let but of selectors) {
-    but.onclick = fetchLocalPoke
+    if(newHtml.length < 1) {
+      newHtml="No Favorite Pokemon to Display"
+    }
+
+    document.getElementById("favorites").innerHTML = newHtml
+
+    let selectors = document.getElementsByClassName("btn favPokeSelector")
+    for(let but of selectors) {
+      but.onclick = fetchLocalPoke
+    }
+    console.log(document.getElementById("favorites"))
+  } else {
+
   }
-  console.log(document.getElementById("favorites"))
 }
 
 async function addToFavorite() {
@@ -462,19 +523,32 @@ function App() {
 
   return (
     <div className="App">
-      <header className="App-header">
-        <AuthApp />
-        <PreviousPokemon />
-        <Search />
-        <Favorites />
-        <PokeImage />
-        <FavoriteButton />
-        <PokeDesc />
-        <PokeStats />
-        <PokeAbilities />
-        <PokeMoves />
-
-      </header>
+      <div className="App-header">
+        <Favorites/>
+        <div className="mt-5 container">
+          <div className="mx-auto row">
+              <PreviousPokemon />
+              <Search />
+          </div>
+          <div className="row">
+            <PokeDesc />
+          </div>
+          <div className='mt-3 row'>
+            <div className='mx-auto col-sm mb-3'>
+              <PokeImage />
+            </div>
+            <div className='col-sm'>
+              <PokeStats />
+            </div>
+          </div>
+          <div className="row">
+            <div className='col-sm'>
+              <PokeAbilities />
+            </div>
+          </div>
+            <PokeMoves />
+          </div>
+        </div>
     </div>
   );
 }
