@@ -291,6 +291,8 @@ async function updateMoves(){
 
   pages = pokeMoves.length/entryCount
 
+  filterMoves()
+
   for(let move of filteredPokeMoves) {
     let response = await fetch(move.move.url)
     let move_data = await response.json();
@@ -304,14 +306,11 @@ async function updateMoves(){
 }
 
 async function filterMoves() {
-  movesSearch = document.getElementById("moves-search-input").value
+  movesSearch = document.getElementById("moves-search-input").value.toLowerCase().trim()
   console.log(movesSearch)
-  if (movesSearch.length > 0){
-    filteredPokeMoves = pokeMoves.filter(value => (value.move.name).includes(movesSearch))
-  }
+  filteredPokeMoves = pokeMoves.filter(value => (value.move.name).includes(movesSearch))
   filteredPokeMoves = filteredPokeMoves.slice(0, entryCount)
-  
-  updateMoves()
+  console.log(filteredPokeMoves)
 }
 
 
