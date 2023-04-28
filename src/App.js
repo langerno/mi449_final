@@ -256,8 +256,9 @@ async function updateAbilities() {
 /* Pokemon Moves */
 
 let entryCount = 10
-let pages = 0
+let pages = 3
 let filteredPokeMoves = pokeMoves
+let currentPage = 1
 
 function PokeMoves(){
   return(
@@ -279,21 +280,56 @@ function PokeMoves(){
       </table>
       <nav aria-label="...">
       <ul class="pagination" id="table-pages">
-        <li class="page-item disabled">
-          <a class="page-link" href="#" tabindex="-1">Previous</a>
-        </li>
-        <li class="page-item"><a class="page-link" href="#">1</a></li>
-        <li class="page-item active">
-          <a class="page-link" href="#">2</a>
-        </li>
-        <li class="page-item"><a class="page-link" href="#">3</a></li>
         <li class="page-item">
-          <a class="page-link" href="#">Next</a>
+          <button class="page-link" href="#" onClick={tablePageChange}>Previous</button>
+        </li>
+        <li class="page-item  active"><button class="page-link" href="#" onClick={tablePageChange}>1</button></li>
+        <li class="page-item">
+          <button class="page-link" href="#" onClick={tablePageChange}>2</button>
+        </li>
+        <li class="page-item"><button class="page-link" href="#" onClick={tablePageChange}>3</button></li>
+        <li class="page-item">
+          <button class="page-link" href="#" onClick={tablePageChange}>Next</button>
         </li>
       </ul>
     </nav>
     </div>
   )
+}
+
+function updatePageTab(page, list){
+  if(page !== null){
+    page.setAttribute('class', "page-item active")
+  }
+
+  for(let el of list){
+    if(page !== el){
+      el.setAttribute('class', "page-item")
+    }
+  }
+}
+
+function tablePageChange(event) {
+  let pageList = event.target.parentElement.parentElement.children
+  let element = event.target.parentElement
+  let contents = event.target.innerHTML
+
+  if(contents === "Previous" && currentPage !== 1){
+    currentPage -= 1
+    element = pageList[currentPage]
+  }
+  else if(contents === "Next" && currentPage !== pages){
+    currentPage += 1
+    element = pageList[currentPage]
+  }else if(contents !== "Next" && contents !== "Previous"){
+    currentPage = contents
+  }else{
+    return
+  }
+
+  updatePageTab(
+    element, 
+    pageList)
 }
 
 async function updateMoves(){
