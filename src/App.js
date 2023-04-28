@@ -362,7 +362,14 @@ function AuthApp() {
 function Favorites() {
   return (
     <>
-      <div class="collapse" id="favorites"></div>
+      <div class="collapse" id="favorites-dropdown">  
+        <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="facorites-dropdown" aria-haspopup="true" aria-expanded="false">
+          Favorites
+        </button>
+        <div id="favorites">
+
+        </div>
+      </div>
     </>
   )
 }
