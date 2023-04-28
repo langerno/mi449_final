@@ -362,7 +362,7 @@ function AuthApp() {
 function Favorites() {
   return (
     <>
-      <div id="favorites"></div>
+      <div class="collapse" id="favorites"></div>
     </>
   )
 }
