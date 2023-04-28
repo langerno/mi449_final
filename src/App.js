@@ -38,7 +38,7 @@ function capitalizeFirstLetter(string) {
 
 function Search(){
   return (
-    <div class="w-25 form-inline">
+    <div class="w-25 mx-auto form-inline">
       <input id="searchBar" class="form-control"/>
       <button class="btn btn-primary" onClick={onSubmit}>Submit</button>
     </div>
@@ -255,6 +255,9 @@ async function updateAbilities() {
 
 /* Pokemon Moves */
 
+let entryCount = 10
+let pages = 0
+let filteredPokeMoves = pokeMoves
 
 function PokeMoves(){
   return(
@@ -285,7 +288,10 @@ async function updateMoves(){
     pokeMoves = currentPokeData.moves
   }
   console.log(pokeMoves)
-  for(let move of pokeMoves) {
+
+  pages = pokeMoves.length/entryCount
+
+  for(let move of filteredPokeMoves) {
     let response = await fetch(move.move.url)
     let move_data = await response.json();
     let desc = move_data.effect_entries[0]
@@ -301,8 +307,10 @@ async function filterMoves() {
   movesSearch = document.getElementById("moves-search-input").value
   console.log(movesSearch)
   if (movesSearch.length > 0){
-    pokeMoves = pokeMoves.filter(value => (value.move.name).includes(movesSearch))
+    filteredPokeMoves = pokeMoves.filter(value => (value.move.name).includes(movesSearch))
   }
+  filteredPokeMoves = filteredPokeMoves.slice(0, entryCount)
+  
   updateMoves()
 }
 
