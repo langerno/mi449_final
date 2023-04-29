@@ -43,7 +43,7 @@ function Search(){
       <div class="row">
         <div class="col-sm">
           <h5>Previous</h5>
-          <button class='btn adjacentPokeSelector'><img id="prev-sprite" alt="previous pokemon by id"></img></button>
+          <button class='btn adjacentPokeSelector' onClick={fetchLocalPoke}><img id="prev-sprite" alt=""></img></button>
         </div>
         <div class="col-sm">
           <div class="mx-auto form-inline">
@@ -53,7 +53,7 @@ function Search(){
         </div>
         <div class="col-sm">
           <h5>Next</h5>
-          <button class='btn adjacentPokeSelector'><img id="next-sprite" alt="next pokemon by id"></img></button>
+          <button class='btn adjacentPokeSelector' onClick={fetchLocalPoke}><img id="next-sprite" alt=""></img></button>
         </div>
       </div>
     </div>
@@ -73,13 +73,14 @@ async function getMainThree(userInput) {
     prevPoke = await findPokemon(currentPokeData.id - 1)
     nextPoke = await findPokemon(currentPokeData.id + 1)
     updatePage();
-  }
-  console.log(previouslySearched)
-  if(!previouslySearched.find(pokemon => pokemon.name === currentPokeData.name) && currentPokeData !== null) {
-    if(previouslySearched.length > 4){
-      previouslySearched.shift();
+
+    console.log(previouslySearched)
+    if(!previouslySearched.find(pokemon => pokemon.name === currentPokeData.name)) {
+      if(previouslySearched.length > 4){
+        previouslySearched.shift();
+      }
+      previouslySearched.push(currentPokeData)
     }
-    previouslySearched.push(currentPokeData)
   }
 }
 
@@ -117,17 +118,11 @@ async function updateSearch() {
   
   let front = document.getElementById("prev-sprite")
   front.setAttribute('src', prevPoke.sprites.front_default)
-  front.setAttribute('id', prevPoke.name)
+  front.setAttribute('alt', prevPoke.name)
 
   let back = document.getElementById("next-sprite")
   back.setAttribute('src', nextPoke.sprites.front_default)
-  back.setAttribute('id', nextPoke.name)
-
-  let but = document.getElementsByClassName("btn adjacentPokeSelector")
-
-  for(let ton of but) {
-    ton.onclick = fetchLocalPoke
-  }
+  back.setAttribute('alt', nextPoke.name)
 }
 
 
@@ -539,7 +534,7 @@ function PreviousPokemon() {
 async function updatePrevPokemon() {
   let newHtml = ""
   for(let pokemon of previouslySearched) {
-    newHtml += " <button class='btn prevPokeSelector'><img id=" + pokemon.name + " src='" + pokemon.sprites.front_default + " '/> </button>"
+    newHtml += " <button class='btn prevPokeSelector'><img alt=" + pokemon.name + " src='" + pokemon.sprites.front_default + " '/> </button>"
   }
   document.getElementById("prev-poke").innerHTML = newHtml
   let selectors = document.getElementsByClassName("btn prevPokeSelector")
@@ -549,8 +544,9 @@ async function updatePrevPokemon() {
 }
 
 function fetchLocalPoke(event) {
-  let element = event.srcElement
-  getMainThree(element.id)
+  let element = event.target
+  console.log(element.alt)
+  getMainThree(element.alt)
 }
 
 
@@ -663,7 +659,7 @@ async function updateFavorites() {
     await getFavs()
     let newHtml = ""
     for(let fav of favData) {
-      newHtml += " <button class='btn favPokeSelector'><img id=" + fav.name + " src='" + fav.sprites.front_default + " '/> </button>"
+      newHtml += " <button class='btn favPokeSelector'><img alt=" + fav.name + " src='" + fav.sprites.front_default + " '/> </button>"
     }
 
     if(newHtml.length < 1) {
