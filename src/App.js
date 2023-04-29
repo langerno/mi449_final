@@ -292,7 +292,7 @@ function navigatePageTab(page, list){
   }
 
   for(let el of list){
-    if(page !== el){
+    if(page !== el || page == null){
       el.setAttribute('class', "page-item")
     }
   }
@@ -339,8 +339,6 @@ function updatePagesTab(reverse = false){
 
   }
 
-  
-
   li = document.createElement('li')
 
   but = document.createElement('button')
@@ -351,7 +349,7 @@ function updatePagesTab(reverse = false){
   li.appendChild(but)
   list.append(li)
 
-  navigatePageTab(reverse ? list.children[5] : list.children[1], list.children)
+  navigatePageTab(null, list.children)
 
   parent.appendChild(list)
 
@@ -367,6 +365,7 @@ function tablePageChange(event) {
   let virtualPage = currentPage%5
 
   if(contents === "Previous" && currentPage > 1){
+    console.log('prev')
     currentPage = Number(currentPage) - 1 
     console.log(currentPage, virtualPage)
     if(virtualPage === 1){
@@ -381,6 +380,7 @@ function tablePageChange(event) {
     element = pageList[virtualPage]
   }
   else if(contents === "Next" && currentPage < pages-1){
+    console.log('next')
     currentPage = Number(currentPage) + 1
     if(virtualPage === 0){
       pageList = updatePagesTab()
@@ -390,16 +390,19 @@ function tablePageChange(event) {
     element = pageList[virtualPage]
     console.log(element)
   }else if(contents !== "Next" && contents !== "Previous"){
+    console.log('cont')
     currentPage = contents
   }else{
+    console.log('uhh')
     return
   }
+  console.log(pageList)
 
   navigatePageTab(
     element, 
     pageList)
 
-  filterMoves()
+    loadMovesTable()
   
 }
 
@@ -410,18 +413,18 @@ async function updateMoves(){
   }
   console.log(pokeMoves)
 
-  pages = pokeMoves.length/entryCount
-
   currentPage = 1
 
   filterMoves()
-  updatePagesTab()
 
 }
 
 async function loadMovesTable(data) {
   let moves_html = ""
-  for(let move of filteredPokeMoves) {
+  let numCurrentPage = Number(currentPage)
+  let tempMoves  = filteredPokeMoves.slice((numCurrentPage-1)*entryCount, numCurrentPage*entryCount)
+
+  for(let move of tempMoves) {
     let response = await fetch(move.move.url)
     let move_data = await response.json();
     let desc = move_data.effect_entries[0]
@@ -431,14 +434,17 @@ async function loadMovesTable(data) {
     }
   }
   document.getElementById("moves_body").innerHTML = moves_html
+
 }
 
 async function filterMoves() {
-  let numCurrentPage = Number(currentPage)
   movesSearch = document.getElementById("moves-search-input").value.toLowerCase().trim()
   filteredPokeMoves = pokeMoves.filter(value => (value.move.name).includes(movesSearch))
-  filteredPokeMoves = filteredPokeMoves.slice((numCurrentPage-1)*entryCount, numCurrentPage*entryCount)
+
+  pages = filteredPokeMoves.length/entryCount
+
   loadMovesTable()
+  updatePagesTab()
 }
 
 
