@@ -259,6 +259,7 @@ let entryCount = 10
 let pages = 3
 let filteredPokeMoves = pokeMoves
 let currentPage = 1
+const tabCount = 5
 
 function PokeMoves(){
   return(
@@ -285,7 +286,7 @@ function PokeMoves(){
 }
 
 function navigatePageTab(page, list){
-  console.log(page)
+  console.log(page,list)
   if(page !== null){
     page.setAttribute('class', "page-item active")
   }
@@ -297,8 +298,7 @@ function navigatePageTab(page, list){
   }
 }
 
-function updatePagesTab(){
-  let newHtml = ""
+function updatePagesTab(reverse = false){
   let parent = document.getElementById('pages-nav')
   parent.innerHTML = ""
 
@@ -306,7 +306,6 @@ function updatePagesTab(){
   list.setAttribute('class', 'pagination')
 
   let li = document.createElement('li')
-  li.setAttribute('class', "page-item")
 
   let but = document.createElement('button')
   but.setAttribute('class',  'page-link')
@@ -317,21 +316,18 @@ function updatePagesTab(){
   list.append(li)
 
   li = document.createElement('li')
-  li.setAttribute('class', "page-item active")
 
   but = document.createElement('button')
   but.setAttribute('class',  'page-link')
   but.onclick = tablePageChange
-  but.innerHTML = 1
+  but.innerHTML = reverse ? currentPage-4 : currentPage
 
   li.appendChild(but)
   list.append(li)
   
-  parent.appendChild(list)
-
-  for(let i = 2 ; i <= pages ; i++){
+  let i = reverse ? currentPage-(tabCount-2) : currentPage+1
+  for(i ; i < pages && i <= currentPage+tabCount-1 && i%tabCount !== 1; i++){
     li = document.createElement('li')
-    li.setAttribute('class', "page-item")
   
     but = document.createElement('button')
     but.setAttribute('class',  'page-link')
@@ -340,12 +336,12 @@ function updatePagesTab(){
   
     li.appendChild(but)
     list.append(li)
-    
-    parent.appendChild(list)
+
   }
 
+  
+
   li = document.createElement('li')
-  li.setAttribute('class', "page-item")
 
   but = document.createElement('button')
   but.setAttribute('class',  'page-link')
@@ -355,20 +351,44 @@ function updatePagesTab(){
   li.appendChild(but)
   list.append(li)
 
+  navigatePageTab(reverse ? list.children[5] : list.children[1], list.children)
+
+  parent.appendChild(list)
+
+  return list.children
+
 }
 
 function tablePageChange(event) {
   let pageList = event.target.parentElement.parentElement.children
+  console.log(pageList)
   let element = event.target.parentElement
   let contents = event.target.innerHTML
+  let virtualPage = currentPage%5
 
-  if(contents === "Previous" && currentPage < 1){
-    currentPage = Number(currentPage) - 1
-    element = pageList[currentPage]
+  if(contents === "Previous" && currentPage > 1){
+    currentPage = Number(currentPage) - 1 
+    console.log(currentPage, virtualPage)
+    if(virtualPage === 1){
+      console.log("here")
+      pageList = updatePagesTab(true)
+      virtualPage = tabCount
+    }else if(virtualPage === 0){
+      virtualPage = tabCount-1
+    }else{
+      virtualPage -= 1
+    }
+    element = pageList[virtualPage]
   }
   else if(contents === "Next" && currentPage < pages-1){
     currentPage = Number(currentPage) + 1
-    element = pageList[currentPage]
+    if(virtualPage === 0){
+      pageList = updatePagesTab()
+    }
+    virtualPage += 1
+    console.log(pageList)
+    element = pageList[virtualPage]
+    console.log(element)
   }else if(contents !== "Next" && contents !== "Previous"){
     currentPage = contents
   }else{
@@ -378,8 +398,9 @@ function tablePageChange(event) {
   navigatePageTab(
     element, 
     pageList)
-  
+
   filterMoves()
+  
 }
 
 async function updateMoves(){
@@ -390,6 +411,8 @@ async function updateMoves(){
   console.log(pokeMoves)
 
   pages = pokeMoves.length/entryCount
+
+  currentPage = 1
 
   filterMoves()
   updatePagesTab()
@@ -411,9 +434,10 @@ async function loadMovesTable(data) {
 }
 
 async function filterMoves() {
+  let numCurrentPage = Number(currentPage)
   movesSearch = document.getElementById("moves-search-input").value.toLowerCase().trim()
   filteredPokeMoves = pokeMoves.filter(value => (value.move.name).includes(movesSearch))
-  filteredPokeMoves = filteredPokeMoves.slice((currentPage-1)*entryCount, currentPage*entryCount)
+  filteredPokeMoves = filteredPokeMoves.slice((numCurrentPage-1)*entryCount, numCurrentPage*entryCount)
   loadMovesTable()
 }
 
