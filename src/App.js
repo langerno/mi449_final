@@ -535,13 +535,34 @@ function AuthApp() {
 
   if (!session) {
     login = false
-    return (<Auth supabaseClient={supabase} providers={[]} appearance={{ theme: ThemeSupa }} />)
+    return (
+      <div className="fixed-top mt-3 w-25 bg-dark card">
+          <a class="btn text-white btn-primary card-title" data-toggle="collapse" href="#favorites-collapse" role="button" aria-expanded="false" aria-controls="favorites-collapse">
+            Favorites
+          </a>
+          <div id="favorites-collapse" class="collapse card-body">
+            <div>
+              <div class="alert alert-primary">Favorites Requires an Account</div>
+            </div>
+            <Auth supabaseClient={supabase} providers={[]} appearance={{ theme: ThemeSupa }} />)
+          </div>
+      </div>
+    )
   }
   else {
     userid = session.user.id
     login = true
     updateFavorites()
-    return (<Favorites />)
+    return (
+      <div className="fixed-top w-25 bg-dark card">
+          <a class="btn text-white btn-primary card-title" data-toggle="collapse" href="#favorites-collapse" role="button" aria-expanded="false" aria-controls="favorites-collapse">
+            Favorites
+          </a>
+          <div id="favorites-collapse" class="collapse card-body">
+            <Favorites />)
+          </div>
+      </div>
+    )
   }
 }
 
@@ -552,15 +573,8 @@ function AuthApp() {
 
 function Favorites() {
   return (
-    <div className="fixed-top w-25 bg-dark card">
-        <a class="btn text-white btn-primary card-title" data-toggle="collapse" href="#favorites-collapse" role="button" aria-expanded="false" aria-controls="favorites-collapse">
-          Favorites
-        </a>
-        <div id="favorites-collapse" class="collapse card-body">
-          <div id="favorites">
-              
-          </div>
-        </div>
+    <div id="favorites">
+                  
     </div>
   )
 }
@@ -665,7 +679,7 @@ function App() {
   return (
     <div className="App">
       <div className="App-header">
-        <Favorites/>
+        <AuthApp />
         <div className="mt-5 container">
           <div className="mx-auto row">
               <PreviousPokemon />
