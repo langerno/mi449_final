@@ -20,6 +20,8 @@ let found = undefined
 let userid = ""
 let favData = []
 let login = false
+let prevPoke = []
+let nextPoke = []
 
 async function getPokemonFromApi(poke) {
   let response = await fetch("https://pokeapi.co/api/v2/pokemon/" + poke +"/")
@@ -33,14 +35,27 @@ function capitalizeFirstLetter(string) {
 }
 
 
-
 /* Search and submit */
 
 function Search(){
   return (
-    <div class="w-25 mx-auto form-inline">
-      <input id="searchBar" class="form-control"/>
-      <button class="btn btn-primary" onClick={onSubmit}>Submit</button>
+    <div class="container">
+      <div class="row">
+        <div class="col-sm">
+          <h5>Previous</h5>
+          <button class='btn adjacentPokeSelector'><img id="prev-sprite" alt="previous pokemon by id"></img></button>
+        </div>
+        <div class="col-sm">
+          <div class="mx-auto form-inline">
+            <input id="searchBar" class="form-control"/>
+            <button class="btn btn-primary" onClick={onSubmit}>Submit</button>
+          </div>
+        </div>
+        <div class="col-sm">
+          <h5>Next</h5>
+          <button class='btn adjacentPokeSelector'><img id="next-sprite" alt="next pokemon by id"></img></button>
+        </div>
+      </div>
     </div>
   )
 
@@ -48,16 +63,41 @@ function Search(){
 
 async function onSubmit() {
   let userInput = document.getElementById("searchBar").value.toLowerCase().trim()
-  findPokemon(userInput)
+  getMainThree(userInput)
+}
+
+async function getMainThree(userInput) {
+  currentPokeData = await findPokemon(userInput)
+
+  if (currentPokeData !== null) {
+    prevPoke = await findPokemon(currentPokeData.id - 1)
+    nextPoke = await findPokemon(currentPokeData.id + 1)
+    updatePage();
+  }
+  console.log(previouslySearched)
+  if(!previouslySearched.find(pokemon => pokemon.name === currentPokeData.name) && currentPokeData !== null) {
+    if(previouslySearched.length > 4){
+      previouslySearched.shift();
+    }
+    previouslySearched.push(currentPokeData)
+  }
+}
+
+function isPokeLocal(poke) {
+  return (previouslySearched.concat(favData).concat(prevPoke).concat(nextPoke)).find(pokemon => pokemon.name === poke || pokemon.id === poke)
 }
 
 async function findPokemon(poke_name) {
-  if (poke_name !== "") {
-    found = (previouslySearched.concat(favData)).find(pokemon => pokemon.name === poke_name)
+  let putHere = []
 
+  console.log(poke_name)
+
+  if (poke_name !== "") {
+    found = isPokeLocal(poke_name)
+    console.log(found)
     if (found === undefined) {
       try{
-        currentPokeData = await getPokemonFromApi(poke_name)
+        putHere = await getPokemonFromApi(poke_name)
       } catch {
         found = currentPokeData
         console.log("FAILED TO FIND POKEMON IN API")
@@ -65,24 +105,29 @@ async function findPokemon(poke_name) {
 
     }else{
       console.log("FOUND POKEMON LOCALLY")
-      currentPokeData = found
+      putHere = found
     }
 
-    if (currentPokeData !== null) {
-      updatePage();
-    }
-    console.log(previouslySearched)
-    if(found === undefined && currentPokeData !== null) {
-      if(previouslySearched.length > 4){
-        previouslySearched.shift();
-      }
-      previouslySearched.push(currentPokeData)
-    }
+    return putHere
   }
 }
 
 async function updateSearch() {
   document.getElementById("searchBar").value = ""
+  
+  let front = document.getElementById("prev-sprite")
+  front.setAttribute('src', prevPoke.sprites.front_default)
+  front.setAttribute('id', prevPoke.name)
+
+  let back = document.getElementById("next-sprite")
+  back.setAttribute('src', nextPoke.sprites.front_default)
+  back.setAttribute('id', nextPoke.name)
+
+  let but = document.getElementsByClassName("btn adjacentPokeSelector")
+
+  for(let ton of but) {
+    ton.onclick = fetchLocalPoke
+  }
 }
 
 
@@ -119,9 +164,11 @@ async function updateFavoriteButton(){
 function PokeDesc(){
   return(
     <>
+      <div>
+        
+      </div>
       <table id="desc" class="table table-dark table-bordered table-sm">
         <thead id="desc_head" class="thead-dark">
-          <th scope="col"></th>
           <th scope="col">Name</th>
           <th scope="col">Type</th>
           <th scope="col">Height</th>
@@ -129,7 +176,6 @@ function PokeDesc(){
         </thead>
         <tbody id="desc_body">
           <tr>
-            <td><FavoriteButton></FavoriteButton></td>
             <td id='name'></td>
             <td id="type"></td>
             <td id="height"></td>
@@ -504,7 +550,7 @@ async function updatePrevPokemon() {
 
 function fetchLocalPoke(event) {
   let element = event.srcElement
-  findPokemon(element.id)
+  getMainThree(element.id)
 }
 
 
@@ -684,6 +730,7 @@ function App() {
           <div className="mx-auto row">
               <PreviousPokemon />
               <Search />
+              <FavoriteButton />
           </div>
           <div className="row">
             <PokeDesc />
