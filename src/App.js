@@ -320,7 +320,7 @@ function PokeMoves(){
         <tbody id="moves_body">
         </tbody>
       </table>
-      <nav id="pages-nav" aria-label="...">
+      <nav id="pages-nav" class="mx-auto" aria-label="...">
       </nav>
     </div>
   )
@@ -526,8 +526,11 @@ async function updateStats() {
 
 function PreviousPokemon() {
   return(
+    <>
+    <h5>History</h5>
       <div id="prev-poke">
       </div>
+    </>
   )
 }
 
@@ -703,7 +706,21 @@ async function updateDbFavs() {
 }
 
 
+/* Welcome Component */
 
+function Welcome(){
+  return(
+    <div id="welcome">
+      AHHHHHHHHH
+      <button onClick={doThings}></button>
+    </div>
+  )
+}
+
+function doThings(){
+  document.getElementById("App-header").setAttribute('class',  "App-header")
+  document.getElementById("welcome").innerHTML = ""
+}
 
 async function updatePage() {
   updateSearch()
@@ -717,38 +734,38 @@ async function updatePage() {
 }
 
 function App() {
-
-  return (
+  return(
     <div className="App">
-      <div className="App-header">
-        <AuthApp />
-        <div className="mt-5 container">
-          <div className="mx-auto row">
-              <PreviousPokemon />
-              <Search />
-              <FavoriteButton />
+      <Welcome />
+      <div id="App-header" className="App-header invisible">
+      <AuthApp />
+      <div className="mt-5 container">
+        <div className="mx-auto row">
+            <PreviousPokemon />
+            <Search />
+            <FavoriteButton />
+        </div>
+        <div className="row">
+          <PokeDesc />
+        </div>
+        <div className='mt-3 row'>
+          <div className='mx-auto col-sm mb-3'>
+            <PokeImage />
           </div>
-          <div className="row">
-            <PokeDesc />
-          </div>
-          <div className='mt-3 row'>
-            <div className='mx-auto col-sm mb-3'>
-              <PokeImage />
-            </div>
-            <div className='col-sm'>
-              <PokeStats />
-            </div>
-          </div>
-          <div className="row">
-            <div className='col-sm'>
-              <PokeAbilities />
-            </div>
-          </div>
-            <PokeMoves />
+          <div className='col-sm'>
+            <PokeStats />
           </div>
         </div>
+        <div className="row">
+          <div className='col-sm'>
+            <PokeAbilities />
+          </div>
+        </div>
+          <PokeMoves />
+        </div>
+      </div>
     </div>
-  );
+  )
 }
 
 export default App;
