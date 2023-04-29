@@ -189,8 +189,8 @@ function updateDesc(){
     document.getElementById("type").innerHTML += capitalizeFirstLetter(type.type.name) + " "
   }
 
-  document.getElementById("height").innerHTML = currentPokeData.height + " dm"
-  document.getElementById("weight").innerHTML = currentPokeData.weight + " hg"
+  document.getElementById("height").innerHTML = (currentPokeData.height * 0.32808).toFixed(2) + " ft"
+  document.getElementById("weight").innerHTML = (currentPokeData.weight / 4.5359237).toFixed(2) + " lbs"
 }
 
 
@@ -264,7 +264,7 @@ async function updateImage(){
 function PokeAbilities(){
   return(
     <div>
-      <h5> Abilties </h5>
+      <h3> Abilties </h3>
       <table id="abilities" class="table table-dark table-bordered table-sm">
         <thead id="abilities_head" class="thead-dark">
           <th scope="col">Name</th>
@@ -290,7 +290,35 @@ async function updateAbilities() {
 }
 
 
+/* Expanded Definition Modal */ 
 
+function ExpandedDef(){
+  return (
+    <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLongTitle">Modal title</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div id="expanded-info" class="modal-body">
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function fillModal(element) {
+  let modalElementBody = document.getElementById("expanded-info")
+  modalElementBody.innerHTML= ""
+  modalElementBody.appendChild(element)
+}
 
 
 
@@ -305,7 +333,7 @@ const tabCount = 5
 function PokeMoves(){
   return(
     <div>
-      <h5>Moves</h5>
+      <h3>Moves</h3>
       <div class="input-group mb-4">
         <input type="text" class="form-control" id="moves-search-input" />
         <button class="btn btn-primary" id="moves-search" type="button">
@@ -452,6 +480,7 @@ async function updateMoves(){
   if(movesSearch.length === 0) {
     pokeMoves = currentPokeData.moves
   }
+
   console.log(pokeMoves)
 
   currentPage = 1
@@ -465,17 +494,20 @@ async function loadMovesTable(data) {
   let numCurrentPage = Number(currentPage)
   let tempMoves  = filteredPokeMoves.slice((numCurrentPage-1)*entryCount, numCurrentPage*entryCount)
 
-  for(let move of tempMoves) {
+  for(let i = 0 ; i < tempMoves.length ; i++){
+    let move = tempMoves[i]
     let response = await fetch(move.move.url)
     let move_data = await response.json();
     let desc = move_data.effect_entries[0]
     let chance = move_data.effect_chance
     if (desc != null) {
-      moves_html += "<tr scope='row'><td>" + capitalizeFirstLetter(move.move.name) + "</td><td>" + desc.short_effect.replace("$effect_chance", chance) + "</td></tr>"
+      moves_html += "<tr scope='row'><td>" + capitalizeFirstLetter(move.move.name) + "</td><td>" + desc.short_effect.replace("$effect_chance", chance) + "</td> <td><button id='" + (move.move.url) +"' type='button' class='btn btn-primary moves' data-toggle='modal' data-target='#exampleModalCenter'>Details</button></td></tr>"
     }
   }
   document.getElementById("moves_body").innerHTML = moves_html
-
+  for(let but of document.getElementsByClassName("btn btn-primary moves")){
+    but.onclick = onMovesDetails
+  }
 }
 
 async function filterMoves() {
@@ -488,6 +520,68 @@ async function filterMoves() {
   updatePagesTab()
 }
 
+async function onMovesDetails(event){
+  let button = event.target
+  let moveUrl = button.id
+  let move = await fetch(moveUrl)
+  move = await move.json()
+
+  let newFill = document.createElement("div")
+  newFill.innerHTML = move.effect_entries[0].effect.replace("$effect_chance", move.effect_chance)
+
+  let newTable = document.createElement("table")
+  newTable.setAttribute('class', "table table-dark table-bordered table-sm")
+  newFill.appendChild(newTable)
+
+
+  // Set up table frame
+  let newTableHead = document.createElement("thead")
+  newTable.appendChild(newTableHead)
+
+  let newTableBody = document.createElement("tbody")
+  newTable.appendChild(newTableBody)
+
+  let newTableRow = document.createElement("tr")
+  newTableBody.appendChild(newTableRow)
+
+  let accuracy = document.createElement("th")
+  newTableHead.appendChild(accuracy)
+  let accuracyData = document.createElement("td")
+  newTableRow.appendChild(accuracyData)
+
+  let pp = document.createElement("th")
+  newTableHead.appendChild(pp)
+  let ppData = document.createElement("td")
+  newTableRow.appendChild(ppData)
+  
+  let power = document.createElement("th")
+  newTableHead.appendChild(power)
+  let powerData = document.createElement("td")
+  newTableRow.appendChild(powerData)
+
+  let damageType = document.createElement("th")
+  newTableHead.appendChild(damageType)
+  let damageTypeData = document.createElement("td")
+  newTableRow.appendChild(damageTypeData)
+
+
+  // FIll data frame
+  pp.innerHTML = "PP"
+  ppData.innerHTML = move.pp
+
+  power.innerHTML = "Power"
+  powerData.innerHTML = move.power
+
+  damageType.innerHTML = "Damage Type"
+  damageTypeData.innerHTML = capitalizeFirstLetter(move.damage_class.name)
+
+  accuracy.innerHTML = "Accuracy"
+  accuracyData.innerHTML = move.accuracy
+
+
+
+  fillModal(newFill)
+}
 
 
 /* Pokemon stats */
@@ -496,7 +590,7 @@ async function filterMoves() {
 function PokeStats(){
   return(
     <div>
-      <h5> Base Stats and Effort </h5>
+      <h3> Base Stats and Effort </h3>
       <table id="stats" class="table table-dark table-bordered table-sm">
         <thead id="stats_head" class="thead-dark">
           <th scope="col">Name</th>
@@ -764,6 +858,7 @@ function App() {
           <PokeMoves />
         </div>
       </div>
+      <ExpandedDef />
     </div>
   )
 }
