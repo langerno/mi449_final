@@ -106,11 +106,8 @@ function isPokeLocal(poke) {
 async function findPokemon(poke_name) {
   let putHere = []
 
-  console.log(poke_name)
-
   if (poke_name !== "") {
     found = isPokeLocal(poke_name)
-    console.log(found)
     if (found === undefined) {
       try{
         putHere = await getPokemonFromApi(poke_name)
@@ -158,10 +155,10 @@ async function updateFavoriteButton(){
   let element = document.getElementById("favoriteButton")
   if(login && currentPokeData !== null){
     if (!favData.includes(currentPokeData)) {
-      newHtml = "<button type='button' class='btn btn-light'>Favorite</button>"
+      newHtml = "<i type='button' class='position-absolute top-0 start-100 translate-middle p-2 text-warning bi-star'></i>"
       element.onclick = addToFavorite
-    }else {
-      newHtml = "<button type='button' class='btn btn-warning'>Favorite</button>"
+    }else { 
+      newHtml = "<i type='button' class='position-absolute top-0 start-100 translate-middle p-2 text-warning bi-star-fill'></i>"
       element.onclick = unfavorite
     }
     document.getElementById("favoriteButton").innerHTML = newHtml
@@ -222,6 +219,7 @@ function PokeImage() {
   return(
     <div class="ml-5">
       <div className="bg-dark text-white card" style={{width: 450}}>
+        <FavoriteButton />
         <div className="card-img container">
             <div className="card-img row">
               <div className="col-sm">
@@ -787,18 +785,12 @@ async function updateFavorites() {
       newHtml += " <button class='btn favPokeSelector'><img alt=" + fav.name + " src='" + fav.sprites.front_default + " '/> </button>"
     }
 
-    if(newHtml.length < 1) {
-      newHtml="No Favorite Pokemon to Display"
-    }
-
     document.getElementById("favorites").innerHTML = newHtml
 
     let selectors = document.getElementsByClassName("btn favPokeSelector")
     for(let but of selectors) {
       but.onclick = fetchLocalPoke
     }
-  } else {
-
   }
 }
 
@@ -874,7 +866,6 @@ function App() {
         <div className="mx-auto row">
             <PreviousPokemon />
             <Header />
-            <FavoriteButton />
         </div>
         <div className="row">
           <PokeDesc />
