@@ -78,7 +78,6 @@ function Header(){
 
 async function onSubmit(event) {
   let userInput = event.target.parentElement.children[0].value.toLowerCase().trim()
-  console.log(userInput)
   getMainThree(userInput)
 }
 
@@ -91,7 +90,6 @@ async function getMainThree(userInput) {
     nextPoke = await findPokemon(currentPokeData.id + 1)
     updatePage();
 
-    console.log(previouslySearched)
     if(!previouslySearched.find(pokemon => pokemon.name === currentPokeData.name)) {
       if(previouslySearched.length > 4){
         previouslySearched.shift();
@@ -309,7 +307,6 @@ function PokeAbilities(){
 
 async function updateAbilities() {
   let ability_html = ""
-  console.log(currentPokeData.abilities)
   for(let {ability} of currentPokeData.abilities) {
     let response = await fetch(ability.url)
     let ability_data = await response.json();
@@ -401,7 +398,6 @@ function PokeMoves(){
 }
 
 function navigatePageTab(page, list){
-  console.log(page,list)
   if(page !== null){
     page.setAttribute('class', "page-item active")
   }
@@ -474,17 +470,13 @@ function updatePagesTab(reverse = false){
 
 function tablePageChange(event) {
   let pageList = event.target.parentElement.parentElement.children
-  console.log(pageList)
   let element = event.target.parentElement
   let contents = event.target.innerHTML
   let virtualPage = currentPage%5
 
   if(contents === "Previous" && currentPage > 1){
-    console.log('prev')
     currentPage = Number(currentPage) - 1 
-    console.log(currentPage, virtualPage)
     if(virtualPage === 1){
-      console.log("here")
       pageList = updatePagesTab(true)
       virtualPage = tabCount
     }else if(virtualPage === 0){
@@ -495,24 +487,19 @@ function tablePageChange(event) {
     element = pageList[virtualPage]
   }
   else if(contents === "Next" && currentPage < pages-1){
-    console.log('next')
     currentPage = Number(currentPage) + 1
     if(virtualPage === 0){
       pageList = updatePagesTab()
     }
     virtualPage += 1
-    console.log(pageList)
     element = pageList[virtualPage]
-    console.log(element)
+
   }else if(contents !== "Next" && contents !== "Previous"){
-    console.log('cont')
     currentPage = contents
   }else{
-    console.log('uhh')
     return
   }
-  console.log(pageList)
-
+ 
   navigatePageTab(
     element, 
     pageList)
@@ -526,8 +513,6 @@ async function updateMoves(){
   if(movesSearch.length === 0) {
     pokeMoves = currentPokeData.moves
   }
-
-  console.log(pokeMoves)
 
   currentPage = 1
 
@@ -657,7 +642,6 @@ function PokeStats(){
 
 async function updateStats() {
   let stat_html = ""
-      console.log(currentPokeData.stats)
       for(let stat of currentPokeData.stats) {
         stat_html += "<tr scope='row'><td>" + capitalizeFirstLetter(stat.stat.name) + "</td><td>" + stat.base_stat + "</td><td>" + stat.effort + "</td></tr>"
       }
@@ -692,7 +676,6 @@ async function updatePrevPokemon() {
 
 function fetchLocalPoke(event) {
   let element = event.target
-  console.log(element.alt)
   getMainThree(element.alt)
 }
 
@@ -703,7 +686,6 @@ function fetchLocalPoke(event) {
 
 function AuthApp() {
   const [session, setSession] = useState(null)
-  console.log('AUTH APP COMPONENT')
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session)
@@ -717,10 +699,6 @@ function AuthApp() {
     
     return () => subscription.unsubscribe()
   }, [])
-
-  if(session != null) {
-    console.log(session.user.id)
-  }
 
   if (!session) {
     login = false
@@ -788,11 +766,10 @@ async function getFavs() {
     }else{
       for(let fav of data[0].fav_pokemon) {
         try{
-          console.log(data)
           let d = await getPokemonFromApi(fav.id)
           tempData.push(d)
         } catch {
-          console.log("FAILED TO GET POKEMON FROM API: " + fav)
+          console.log("FAILED TO GET POKEMON FROM API: ")
           console.log(fav)
         }
     }
@@ -820,7 +797,6 @@ async function updateFavorites() {
     for(let but of selectors) {
       but.onclick = fetchLocalPoke
     }
-    console.log(document.getElementById("favorites"))
   } else {
 
   }
