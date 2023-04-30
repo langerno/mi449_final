@@ -37,7 +37,25 @@ function capitalizeFirstLetter(string) {
 
 /* Search and submit */
 
-function Search(){
+function SearchBar() {
+  return (
+    <div class="mx-auto form-inline">
+      <input id="searchBar" class="form-control"/>
+      <button class="btn btn-primary" onClick={onSubmit}>Submit</button>
+    </div>
+  )
+}
+
+function WelcomeSearchBar() {
+  return (
+    <div class="mb-2 mx-auto form-inline">
+      <input id="welcomeSearchBar" class="form-control mb-2"/>
+      <button class="btn btn-primary" data-dismiss="modal" onClick={onSubmit}>Submit</button>
+    </div>
+  )
+}
+
+function Header(){
   return (
     <div class="container">
       <div class="row">
@@ -46,10 +64,7 @@ function Search(){
           <button class='btn adjacentPokeSelector' onClick={fetchLocalPoke}><img id="prev-sprite" alt=""></img></button>
         </div>
         <div class="col-sm">
-          <div class="mx-auto form-inline">
-            <input id="searchBar" class="form-control"/>
-            <button class="btn btn-primary" onClick={onSubmit}>Submit</button>
-          </div>
+          <SearchBar />
         </div>
         <div class="col-sm">
           <h5>Next</h5>
@@ -61,12 +76,14 @@ function Search(){
 
 }
 
-async function onSubmit() {
-  let userInput = document.getElementById("searchBar").value.toLowerCase().trim()
+async function onSubmit(event) {
+  let userInput = event.target.parentElement.children[0].value.toLowerCase().trim()
+  console.log(userInput)
   getMainThree(userInput)
 }
 
 async function getMainThree(userInput) {
+  
   currentPokeData = await findPokemon(userInput)
 
   if (currentPokeData !== null) {
@@ -141,14 +158,18 @@ function FavoriteButton() {
 async function updateFavoriteButton(){
   let newHtml = ""
   let element = document.getElementById("favoriteButton")
-  if (!favData.includes(currentPokeData)) {
-    newHtml = "<button type='button' class='btn btn-light'>Favorite</button>"
-    element.onclick = addToFavorite
-  }else {
-    newHtml = "<button type='button' class='btn btn-warning'>Favorite</button>"
-    element.onclick = unfavorite
+  if(login && currentPokeData !== null){
+    if (!favData.includes(currentPokeData)) {
+      newHtml = "<button type='button' class='btn btn-light'>Favorite</button>"
+      element.onclick = addToFavorite
+    }else {
+      newHtml = "<button type='button' class='btn btn-warning'>Favorite</button>"
+      element.onclick = unfavorite
+    }
+    document.getElementById("favoriteButton").innerHTML = newHtml
+  }else{
+    element.innerHTML = ""
   }
-  document.getElementById("favoriteButton").innerHTML = newHtml
 }
 
 
@@ -298,15 +319,12 @@ function ExpandedDef(){
       <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title" id="exampleModalLongTitle">Modal title</h5>
+            <h5 class="modal-title" id="exampleModalLongTitle">Move Details</h5>
             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
               <span aria-hidden="true">&times;</span>
             </button>
           </div>
           <div id="expanded-info" class="modal-body">
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
           </div>
         </div>
       </div>
@@ -530,12 +548,13 @@ async function onMovesDetails(event){
   newFill.innerHTML = move.effect_entries[0].effect.replace("$effect_chance", move.effect_chance)
 
   let newTable = document.createElement("table")
-  newTable.setAttribute('class', "table table-dark table-bordered table-sm")
+  newTable.setAttribute('class', "table table-light table-sm")
   newFill.appendChild(newTable)
 
 
   // Set up table frame
   let newTableHead = document.createElement("thead")
+  newTableHead.setAttribute('class', "thead thead-dark")
   newTable.appendChild(newTableHead)
 
   let newTableBody = document.createElement("tbody")
@@ -545,21 +564,25 @@ async function onMovesDetails(event){
   newTableBody.appendChild(newTableRow)
 
   let accuracy = document.createElement("th")
+  accuracy.setAttribute('scope', "col")
   newTableHead.appendChild(accuracy)
   let accuracyData = document.createElement("td")
   newTableRow.appendChild(accuracyData)
 
   let pp = document.createElement("th")
+  pp.setAttribute('scope', "col")
   newTableHead.appendChild(pp)
   let ppData = document.createElement("td")
   newTableRow.appendChild(ppData)
   
   let power = document.createElement("th")
+  power.setAttribute('scope', "col")
   newTableHead.appendChild(power)
   let powerData = document.createElement("td")
   newTableRow.appendChild(powerData)
 
   let damageType = document.createElement("th")
+  damageType.setAttribute('scope', "col")
   newTableHead.appendChild(damageType)
   let damageTypeData = document.createElement("td")
   newTableRow.appendChild(damageTypeData)
@@ -692,6 +715,7 @@ function AuthApp() {
     userid = session.user.id
     login = true
     updateFavorites()
+    updateFavoriteButton()
     return (
       <div className="fixed-top w-25 bg-dark card">
           <a class="btn text-white btn-primary card-title" data-toggle="collapse" href="#favorites-collapse" role="button" aria-expanded="false" aria-controls="favorites-collapse">
@@ -804,9 +828,19 @@ async function updateDbFavs() {
 
 function Welcome(){
   return(
-    <div id="welcome">
-      AHHHHHHHHH
-      <button onClick={doThings}></button>
+    <div class="modal fade" id="welcomeModal" tabindex="-1" role="dialog" aria-labelledby="welcomeModal">
+      <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+          <div class="modal-body">
+            <div>
+              <h1>Welcome to the Pokedex!</h1>
+              <p>All Pokemon data on this website is pulled from <a href='https://www.pokeapi.co'>pokeapi.co</a>. Some newer Pokemon may have incomplete or non-existent data. If you haven't already, you can also Log In via the Favorites menu in the top left to save your favorite Pokemon</p>
+              <h6>Enter any Pokemon Name and click Submit to begin</h6>
+            </div>
+            <WelcomeSearchBar />
+          </div>
+        </div>
+      </div>
     </div>
   )
 }
@@ -831,12 +865,12 @@ function App() {
   return(
     <div className="App">
       <Welcome />
-      <div id="App-header" className="App-header invisible">
+      <div id="App-header" className="App-header">
       <AuthApp />
       <div className="mt-5 container">
         <div className="mx-auto row">
             <PreviousPokemon />
-            <Search />
+            <Header />
             <FavoriteButton />
         </div>
         <div className="row">
