@@ -234,7 +234,7 @@ function PokeImage() {
               </div>
             </div>
           </div>
-          <div class="card-img-overlay">
+          <div class="card-img-title">
             <h5 class="card-title">
               Default Sprites
             </h5>
@@ -251,7 +251,7 @@ function PokeImage() {
               </div>
             </div>
           </div>
-          <div class="card-img-overlay">
+          <div class="card-img-title">
             <h5 class="card-title">
               Shiny Sprites
             </h5>
@@ -262,16 +262,24 @@ function PokeImage() {
 }
 
 async function updateImage(){
-  document.getElementById("frontSprite").setAttribute("src", currentPokeData.sprites.front_default);
+  let frontDefault = currentPokeData.sprites.front_default
+  frontDefault = frontDefault ? frontDefault : 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/No_image_available.svg/300px-No_image_available.svg.png'
+  document.getElementById("frontSprite").setAttribute("src", frontDefault);
   document.getElementById("frontSprite").setAttribute("alt", "Front Sprite of " + currentPokeData.name);
 
-  document.getElementById("backSprite").setAttribute("src", currentPokeData.sprites.back_default);
+  let backDefault = currentPokeData.sprites.back_default
+  backDefault = backDefault ? backDefault : 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/No_image_available.svg/300px-No_image_available.svg.png'
+  document.getElementById("backSprite").setAttribute("src", backDefault);
   document.getElementById("backSprite").setAttribute("alt", "Back Sprite of " + currentPokeData.name);
 
-  document.getElementById("shinyFront").setAttribute("src", currentPokeData.sprites.front_shiny);
+  let frontShiny = currentPokeData.sprites.front_shiny
+  frontShiny = frontShiny ? frontShiny : 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/No_image_available.svg/300px-No_image_available.svg.png'
+  document.getElementById("shinyFront").setAttribute("src", frontShiny);
   document.getElementById("shinyFront").setAttribute("alt", "Front Sprite of Shiny " + currentPokeData.name);
 
-  document.getElementById("shinyBack").setAttribute("src", currentPokeData.sprites.back_shiny);
+  let backShiny = currentPokeData.sprites.back_shiny
+  backShiny = backShiny ? backShiny : 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/No_image_available.svg/300px-No_image_available.svg.png'
+  document.getElementById("shinyBack").setAttribute("src", backShiny);
   document.getElementById("shinyBack").setAttribute("alt", "Back Sprite of Shiny" + currentPokeData.name);
 }
 
@@ -590,17 +598,16 @@ async function onMovesDetails(event){
 
   // FIll data frame
   pp.innerHTML = "PP"
-  ppData.innerHTML = move.pp
+  ppData.innerHTML = move.pp ? move.pp : 'N/A'
 
   power.innerHTML = "Power"
-  powerData.innerHTML = move.power
+  powerData.innerHTML = move.power ? move.power : 'N/A'
 
   damageType.innerHTML = "Damage Type"
   damageTypeData.innerHTML = capitalizeFirstLetter(move.damage_class.name)
 
   accuracy.innerHTML = "Accuracy"
-  accuracyData.innerHTML = move.accuracy
-
+  accuracyData.innerHTML = move.accuracy ? move.accuracy : 'N/A'
 
 
   fillModal(newFill)
