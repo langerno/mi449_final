@@ -840,11 +840,6 @@ function Welcome(){
   )
 }
 
-function doThings(){
-  document.getElementById("App-header").setAttribute('class',  "App-header")
-  document.getElementById("welcome").innerHTML = ""
-}
-
 async function updatePage() {
   updateSearch()
   updateAbilities()
