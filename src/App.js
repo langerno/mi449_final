@@ -313,9 +313,26 @@ async function updateAbilities() {
   for(let {ability} of currentPokeData.abilities) {
     let response = await fetch(ability.url)
     let ability_data = await response.json();
-    ability_html += "<tr scope='row'><td>" + capitalizeFirstLetter(ability.name) + "</td><td>" + ability_data.effect_entries[1].short_effect + "</td></tr>"
+    ability_html += "<tr scope='row'><td>" + capitalizeFirstLetter(ability.name) + "</td><td>" + ability_data.effect_entries[1].short_effect + "</td><td><button id='" + (ability.url) +"' type='button' class='btn btn-primary abilties' data-toggle='modal' data-target='#exampleModalCenter'>Details</button></td></tr>"
   }
+
   document.getElementById("abilities_body").innerHTML = ability_html
+  for(let but of document.getElementsByClassName("btn btn-primary abilties")){
+    but.onclick = onAbiltiesDetails
+  }
+}
+
+async function onAbiltiesDetails(event) {
+  let button = event.target
+  let abilityUrl = button.id
+  let ability = await fetch(abilityUrl)
+  ability = await ability.json()
+
+  let newFill = document.createElement("div")
+  newFill.innerHTML = ability.effect_entries[1].effect.replace("$effect_chance", ability.effect_chance)
+
+  fillModal(newFill, "Ability Details")
+
 }
 
 
@@ -327,7 +344,7 @@ function ExpandedDef(){
       <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title" id="exampleModalLongTitle">Move Details</h5>
+            <h5 class="modal-title" id="modalTitle">Move Details</h5>
             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
               <span aria-hidden="true">&times;</span>
             </button>
@@ -340,10 +357,13 @@ function ExpandedDef(){
   )
 }
 
-function fillModal(element) {
+function fillModal(element, title) {
   let modalElementBody = document.getElementById("expanded-info")
   modalElementBody.innerHTML= ""
   modalElementBody.appendChild(element)
+
+  let modalElementTitle = document.getElementById("modalTitle")
+  modalElementTitle.innerHTML = title
 }
 
 
@@ -610,7 +630,7 @@ async function onMovesDetails(event){
   accuracyData.innerHTML = move.accuracy ? move.accuracy : 'N/A'
 
 
-  fillModal(newFill)
+  fillModal(newFill, "Move Details")
 }
 
 
